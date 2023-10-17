@@ -5,7 +5,7 @@ const cors = require("cors")
 const { default: axios } = require("axios");
 
 app.use(cors())
-app.use(require("./api"))
+app.use(require("./routes/api"))
 
 app.get("/", (req, res) => {
     res.json({
