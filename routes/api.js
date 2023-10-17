@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const { recomendation, allSeries, populer, search, details, bacaKomik } = require("./controller")
+const { recomendation, allSeries, populer, search, details, bacaKomik } = require("../controller")
 
 router.get("/api/recomendation", recomendation)
 router.get("/api/all/:page?", allSeries)
