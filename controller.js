@@ -1,7 +1,7 @@
 require("dotenv").config()
 const axios = require("axios")
 const cheerio = require("cheerio")
-const baseUrl = "https://mangatale.co/"
+const baseUrl = process.env.BASE_URL
 
 const recomendation = async (req, res) => {
     let recomendations = []
