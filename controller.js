@@ -237,7 +237,7 @@ const details = async (req, res) => {
             rating = parseFloat($(".num").text())
             status = $(".imptdt i").text()
             type = $(".imptdt a").text()
-            alternative_title = $(".wd-full b").html() === "Alternative Titles" ? $(".wd-full span").first( ).text() : null
+            alternative_title = $(".wd-full b").html() === "Alternative Titles" ? $(".wd-full span").first().text() : null
             sysnopsis = $(".wd-full .entry-content").text().trim()
             $(".fmed").each((i, el) => {
                 if ($(el).find("b").html() === "Released") {
@@ -368,6 +368,45 @@ const bacaKomik = async (req, res) => {
     }
 }
 
+const allByGenre = async (req, res) => {
+    const { genre, page = 1 } = req.params
+    const byGenre = {
+        results: {
+            page: parseInt(page),
+            result: [],
+        },
+        pages: "",
+    }
+    let poster, type, title, endpoint, rating, chapter
+    axios({
+        url: `${baseUrl}genres/${genre}/page/${page}`,
+        method: "get",
+        headers: {
+            "User-Agent": "Chrome",
+        },
+    }).then((result) => {
+        const $ = cheerio.load(result.data)
+        byGenre.pages = parseInt($(".dots").next().text())
+        $(".listupd .bs").each((i, el) => {
+            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            type = $(el).find("span.type").text()
+            poster = $(el).find("img").attr("src")
+            title = $(el).find(".tt").text().trim()
+            chapter = $(el).find(".epxs").text().trim()
+            rating = parseFloat($(el).find(".numscore").text().trim())
+
+            byGenre.results.result.push({ endpoint, type, poster, title, chapter, rating })
+        })
+        return res.json({ byGenre })
+    }).catch((err) => {
+        res.json({ 
+            message: "error", 
+            status: 404
+         })
+    })
+}
+
+
 
 module.exports = {
     recomendation,
@@ -375,5 +414,6 @@ module.exports = {
     populer,
     search,
     details,
-    bacaKomik
+    bacaKomik,
+    allByGenre
 }
