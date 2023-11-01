@@ -8,7 +8,7 @@ router.get("/api", (req, res) => {
 router.get("/api/recomendation", recomendation)
 router.get("/api/all/:page?/:allparams?", allSeries)
 router.get("/api/populer", populer)
-router.get("/api/s/:page?/:query", search)
+router.get("/api/s/:query/:page?", search)
 router.get("/api/details/:endpoint/:ch?", details)
 router.get("/api/komik/ch/:endpoint", bacaKomik)
 router.get("/api/allby/:genre/:page?", allByGenre)
