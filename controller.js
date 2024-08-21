@@ -64,6 +64,8 @@ const allSeries = async (req, res) => {
         return res.json({
             message: "berhasil",
             results: {
+                prev: $(".l").length != 0 ? true : false,
+                next: $(".r").length != 0 ? true : false,
                 data: all
             }
         })
