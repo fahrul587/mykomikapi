@@ -177,9 +177,18 @@ const search = async (req, res) => {
 
             searchResults.push({ endpoint, type, poster, title, chapter, rating })
         })
+        let pageFound;
+        if ($(".next").length != 0) {
+            pageFound = Number($(".next").prev().text().trim())
+        } else if ($(".pagination").children()) {
+            pageFound = Number($(".pagination").children().last().text())
+        }
         return res.json({
             message: "berhasil",
             results: {
+                pageFound: pageFound == 0 ? 1 : pageFound,
+                prev: $(".prev").length != 0 ? true : false,
+                next: $(".next").length != 0 ? true : false,
                 data: searchResults
             }
         })
