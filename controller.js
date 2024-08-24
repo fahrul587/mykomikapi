@@ -40,11 +40,11 @@ const recomendation = async (req, res) => {
 }
 
 const allSeries = async (req, res) => {
-    const { page = 1 } = req.params
+    const {genres = "genre[]=", types = "", page = 1 } = req.params
     let all = []
     let poster, type, title, endpoint, rating, chapter
     axios({
-        url: `${baseUrl}/manga/?page=${page}`,
+        url: `${baseUrl}manga/?page=${page}&${genres}&type=${types}`,
         method: "get",
         headers: {
             "User-Agent": "Chrome",
@@ -354,7 +354,7 @@ const allByGenre = async (req, res) => {
         },
     }).then((result) => {
         const $ = cheerio.load(result.data)
-        byGenre.pages = parseInt($(".dots").next().text())
+        byGenre.pages = $(".dots").parent().text()
         $(".listupd .bs").each((i, el) => {
             endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
             type = $(el).find("span.type").text()
@@ -374,6 +374,41 @@ const allByGenre = async (req, res) => {
     })
 }
 
+const getListKomik = async (req, res) => {
+    let genres = []
+    let types = []
+    axios({
+        url: `${baseUrl}manga`,
+        method: "get",
+        headers: {
+            "User-Agent": "Chrome",
+        },
+    }).then((result) => {
+        const $ = cheerio.load(result.data)
+        $(".genrez li").each((i, el) => {
+            let genre = $(el).text().trim()
+            genres.push(genre)
+        })
+        $("[name=type]").next().each((i, el) => {
+            let type = $(el).text().trim()
+            types.push(type)
+        })
+        types = [...new Set(types)].sort()
+        genres.shift()
+        return res.json({
+            result: {
+                genres,
+                types
+            }
+        })
+    }).catch((err) => {
+        res.json({
+            message: "error",
+            status: 404
+        })
+    })
+}
+
 
 
 module.exports = {
@@ -383,5 +418,6 @@ module.exports = {
     search,
     details,
     bacaKomik,
-    allByGenre
+    allByGenre,
+    getListKomik
 }

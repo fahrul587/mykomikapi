@@ -2,7 +2,6 @@ require("dotenv").config()
 const express = require("express")
 const app = express()
 const cors = require("cors")
-const { default: axios } = require("axios");
 
 
 app.use(cors())
