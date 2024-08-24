@@ -40,7 +40,7 @@ const recomendation = async (req, res) => {
 }
 
 const allSeries = async (req, res) => {
-    const {genres = "genre[]=", types = "", page = 1 } = req.params
+    const { genres = "genre[]=", types = "", page = 1 } = req.params
     let all = []
     let poster, type, title, endpoint, rating, chapter
     axios({
@@ -386,14 +386,26 @@ const getListKomik = async (req, res) => {
     }).then((result) => {
         const $ = cheerio.load(result.data)
         $(".genrez li").each((i, el) => {
-            let genre = $(el).text().trim()
+            let genre = {
+                name: $(el).text().trim(),
+                value: $(el).find("input").val()
+            }
             genres.push(genre)
         })
-        $("[name=type]").next().each((i, el) => {
-            let type = $(el).text().trim()
+        $("[name=type]").each((i, el) => {
+            let type = {
+                name: $(el).next().text().trim(),
+                value: $(el).val()
+            }
+            $(el).text().trim()
             types.push(type)
         })
-        types = [...new Set(types)].sort()
+        types = types.filter((item, index, self) =>
+            index === self.findIndex((t) => (
+                t.name === item.name && t.value === item.value
+            ))
+        );
+        types.shift()
         genres.shift()
         return res.json({
             result: {
