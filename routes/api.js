@@ -6,7 +6,7 @@ router.get("/api", (req, res) => {
     res.json({message: "ok"})
 })
 router.get("/api/recomendation", recomendation)
-router.get("/api/all/:page?/:genres?/:types?", allSeries)
+router.get("/api/all/:page?/:genres?/:types?/:status?", allSeries)
 router.get("/api/populer", populer)
 router.get("/api/s/:query/:page?", search)
 router.get("/api/details/:endpoint/:ch?", details)
