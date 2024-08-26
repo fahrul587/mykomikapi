@@ -377,6 +377,7 @@ const allByGenre = async (req, res) => {
 const getListKomik = async (req, res) => {
     let genres = []
     let types = []
+    let status = []
     axios({
         url: `${baseUrl}manga`,
         method: "get",
@@ -400,17 +401,32 @@ const getListKomik = async (req, res) => {
             $(el).text().trim()
             types.push(type)
         })
+        $("[name=status]").each((i, el) => {
+            let stat = {
+                name: $(el).next().text().trim(),
+                value: $(el).val()
+            }
+            $(el).text().trim()
+            status.push(stat)
+        })
         types = types.filter((item, index, self) =>
             index === self.findIndex((t) => (
                 t.name === item.name && t.value === item.value
             ))
         );
+        status = status.filter((item, index, self) =>
+            index === self.findIndex((t) => (
+                t.name === item.name && t.value === item.value
+            ))
+        );
+        status.shift()
         types.shift()
         genres.shift()
         return res.json({
             result: {
                 genres,
-                types
+                types,
+                status
             }
         })
     }).catch((err) => {
