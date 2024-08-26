@@ -409,6 +409,11 @@ const getListKomik = async (req, res) => {
             $(el).text().trim()
             status.push(stat)
         })
+        genres = genres.filter((item, index, self) =>
+            index === self.findIndex((t) => (
+                t.name === item.name && t.value === item.value
+            ))
+        );
         types = types.filter((item, index, self) =>
             index === self.findIndex((t) => (
                 t.name === item.name && t.value === item.value
