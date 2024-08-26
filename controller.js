@@ -40,12 +40,11 @@ const recomendation = async (req, res) => {
 }
 
 const allSeries = async (req, res) => {
-    const { genres = "genre[]=", types = "", page = 1, status = "" } = req.params
-    console.log(req.params)
+    const { genres, types, page = 1, status } = req.params
     let all = []
     let poster, type, title, endpoint, rating, chapter
     axios({
-        url: `${baseUrl}manga/?page=${page}&${genres}&type=${types}&status=${status}`,
+        url: `${baseUrl}manga/?page=${page}&${genres}&${types}&${status}`,
         method: "get",
         headers: {
             "User-Agent": "Chrome",
