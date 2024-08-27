@@ -43,6 +43,7 @@ const allSeries = async (req, res) => {
     const { genres, types, page = 1, status } = req.params
     let all = []
     let poster, type, title, endpoint, rating, chapter
+    console.log(`${baseUrl}manga/?page=${page}&${genres}&${types}&${status}`)
     axios({
         url: `${baseUrl}manga/?page=${page}&${genres}&${types}&${status}`,
         method: "get",
@@ -98,7 +99,7 @@ const populer = async (req, res) => {
             $(el).find("span > a").each((i, g) => {
                 const genre = {
                     name: $(g).text().trim(),
-                    link: $(g).attr("href")
+                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
                 }
                 genres.push(genre)
             })
