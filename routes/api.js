@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const { recomendation, allSeries, populer, search, details, bacaKomik, allByGenre, getListKomik } = require("../controller")
+const { recomendation, allSeries, populer, search, details, bacaKomik, allByGenre, getListKomik, underated } = require("../controller")
 
 router.get("/api", (req, res) => {
     res.json({message: "ok"})
@@ -13,5 +13,6 @@ router.get("/api/details/:endpoint/:ch?", details)
 router.get("/api/komik/ch/:endpoint", bacaKomik)
 router.get("/api/allby/:genre/:page?", allByGenre)
 router.get("/api/filterlist", getListKomik)
+router.get("/api/underated", underated)
 
 module.exports = router

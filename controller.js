@@ -443,6 +443,41 @@ const getListKomik = async (req, res) => {
     })
 }
 
+const underated = async (req, res) => {
+    let underateds = []
+    let poster, type, title, endpoint, rating, chapter
+    axios({
+        url: `${baseUrl}`,
+        method: "get",
+        headers: {
+            "User-Agent": "Chrome",
+        },
+    }).then((result) => {
+        const $ = cheerio.load(result.data)
+        $(".tab-pane .bs:first-child").map((i, el) => {
+            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            type = $(el).find("span.type").text()
+            poster = $(el).find("img").attr("src")
+            title = $(el).find(".tt").text().trim()
+            chapter = $(el).find(".epxs").text().trim()
+            rating = parseFloat($(el).find(".numscore").text().trim())
+
+            underateds.push({ endpoint, type, poster, title, chapter, rating })
+        })
+
+        return res.json({
+            result: {
+                data: underateds
+            }
+        })
+    }).catch((err) => {
+        res.json({
+            message: "error",
+            status: 404
+        })
+    })
+}
+
 
 
 module.exports = {
@@ -453,5 +488,6 @@ module.exports = {
     details,
     bacaKomik,
     allByGenre,
-    getListKomik
+    getListKomik,
+    underated
 }
