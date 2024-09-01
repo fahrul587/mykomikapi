@@ -96,7 +96,7 @@ const populer = async (req, res) => {
             poster = $(el).find("img").attr("src")
             title = $(el).find("h2 > a").text().trim()
             genres = []
-            $(el).find("span > a").each((i, g) => {
+            $(el).find("span a").map((i, g) => {
                 const genre = {
                     name: $(g).text().trim(),
                     link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
@@ -116,7 +116,7 @@ const populer = async (req, res) => {
             $(el).find("span > a").each((i, g) => {
                 const genre = {
                     name: $(g).text().trim(),
-                    link: $(g).attr("href")
+                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
                 }
                 genres.push(genre)
             })
@@ -133,7 +133,7 @@ const populer = async (req, res) => {
             $(el).find("span > a").each((i, g) => {
                 const genre = {
                     name: $(g).text().trim(),
-                    link: $(g).attr("href")
+                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
                 }
                 genres.push(genre)
             })
@@ -403,6 +403,7 @@ const getListKomik = async (req, res) => {
             types.push(type)
         })
         $("[name=status]").each((i, el) => {
+            
             let stat = {
                 name: $(el).next().text().trim(),
                 value: $(el).val()
