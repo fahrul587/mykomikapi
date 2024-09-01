@@ -62,6 +62,7 @@ const allSeries = async (req, res) => {
 
             all.push({ endpoint, type, poster, title, chapter, rating })
         })
+
         return res.json({
             message: "berhasil",
             results: {
@@ -242,10 +243,13 @@ const details = async (req, res) => {
         })
         genres = []
         $(".wd-full").each((i, el) => {
-
             if ($(el).find("b").html() === "Genres") {
                 $(el).find(".mgen a").each((i, a) => {
-                    genres.push($(a).text())
+                    const genre = {
+                        name: $(a).text(),
+                        link: $(a).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
+                    }
+                    genres.push(genre)
                 })
             }
         })
