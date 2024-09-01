@@ -218,7 +218,7 @@ const details = async (req, res) => {
         const $ = cheerio.load(result.data)
         title = $(".bixbox ol").children().last().find("a span").text()
         poster = $(".thumb").find("img").attr("src")
-        followed = $(".bmc").text().replace("Followed by", "").replace("people", "").trim()
+        followed = parseFloat($(".bmc").text().replace("Followed by", "").replace("people", "").trim().split(" ")[1])
         rating = parseFloat($(".num").text())
         status = $(".imptdt i").text()
         type = $(".imptdt a").text()
