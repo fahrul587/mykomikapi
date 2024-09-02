@@ -203,8 +203,9 @@ const search = async (req, res) => {
 }
 
 const details = async (req, res) => {
-    const { endpoint, ch = 0 } = req.params
-    const newDetail = []
+    const { endpoint } = req.params
+    const { ch } = req.query
+
     let title, alternative_title, sysnopsis, released, author, artist, posted_on, update_on, poster, rating, status, type, followed, genres, chapter_list
 
 
@@ -216,66 +217,72 @@ const details = async (req, res) => {
         },
     }).then((result) => {
         const $ = cheerio.load(result.data)
-        title = $(".bixbox ol").children().last().find("a span").text()
-        poster = $(".thumb").find("img").attr("src")
-        followed = parseFloat($(".bmc").text().replace("Followed by", "").replace("people", "").trim().split(" ")[1])
-        rating = parseFloat($(".num").text())
-        status = $(".imptdt i").text()
-        type = $(".imptdt a").text()
-        alternative_title = $(".wd-full b").html() === "Alternative Titles" ? $(".wd-full span").first().text() : null
-        sysnopsis = $(".wd-full .entry-content").text().trim()
-        $(".fmed").each((i, el) => {
-            if ($(el).find("b").html() === "Released") {
-                released = $(el).find("span").text().trim()
-            }
-            if ($(el).find("b").html() === "Author") {
-                author = $(el).find("span").text().trim()
-            }
-            if ($(el).find("b").html() === "Artist") {
-                artist = $(el).find("span").text().trim()
-            }
-            if ($(el).find("b").html() === "Posted On") {
-                posted_on = $(el).find("span").text().trim()
-            }
-            if ($(el).find("b").html() === "Updated On") {
-                update_on = $(el).find("span").text().trim()
-            }
-        })
-        genres = []
-        $(".wd-full").each((i, el) => {
-            if ($(el).find("b").html() === "Genres") {
-                $(el).find(".mgen a").each((i, a) => {
-                    const genre = {
-                        name: $(a).text(),
-                        link: $(a).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
-                    }
-                    genres.push(genre)
-                })
-            }
-        })
-        chapter_list = []
-        $("#chapterlist ul li").each((i, el) => {
-            chapter_list.push({
-                name: $(el).find(".chapternum").text(),
-                release_on: $(el).find(".chapterdate").text(),
-                endpoint: $(el).find("a").attr("href").replace("https://mangatale.co", "").replace(/\//g, ""),
+        if (!ch || ch === "false") {
+            title = $(".bixbox ol").children().last().find("a span").text()
+            poster = $(".thumb").find("img").attr("src")
+            followed = parseFloat($(".bmc").text().replace("Followed by", "").replace("people", "").trim().split(" ")[1])
+            rating = parseFloat($(".num").text())
+            status = $(".imptdt i").text()
+            type = $(".imptdt a").text()
+            alternative_title = $(".wd-full b").html() === "Alternative Titles" ? $(".wd-full span").first().text() : null
+            sysnopsis = $(".wd-full .entry-content").text().trim()
+            $(".fmed").each((i, el) => {
+                if ($(el).find("b").html() === "Released") {
+                    released = $(el).find("span").text().trim()
+                }
+                if ($(el).find("b").html() === "Author") {
+                    author = $(el).find("span").text().trim()
+                }
+                if ($(el).find("b").html() === "Artist") {
+                    artist = $(el).find("span").text().trim()
+                }
+                if ($(el).find("b").html() === "Posted On") {
+                    posted_on = $(el).find("span").text().trim()
+                }
+                if ($(el).find("b").html() === "Updated On") {
+                    update_on = $(el).find("span").text().trim()
+                }
             })
-        })
+            genres = []
+            $(".wd-full").each((i, el) => {
+                if ($(el).find("b").html() === "Genres") {
+                    $(el).find(".mgen a").each((i, a) => {
+                        const genre = {
+                            name: $(a).text(),
+                            link: $(a).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
+                        }
+                        genres.push(genre)
+                    })
+                }
+            })
+        }
 
-        if (chapter_list.length !== 0) {
-            chapter_list.reverse()
-            if (chapter_list.find((chapter) => chapter.endpoint === ch)) {
-                chapter_list.map((c, i) => {
-                    if (c.endpoint === ch) {
-                        chapter_list[i].current = true
-                        chapter_list[i - 1] ? chapter_list[i - 1].prev = true : null
-                        chapter_list[i + 1] ? chapter_list[i + 1].next = true : null
-                    }
+        if (ch !== "false") {
+
+            chapter_list = []
+            $("#chapterlist ul li").each((i, el) => {
+                chapter_list.push({
+                    name: $(el).find(".chapternum").text(),
+                    release_on: $(el).find(".chapterdate").text(),
+                    endpoint: $(el).find("a").attr("href").replace("https://mangatale.co", "").replace(/\//g, ""),
                 })
+            })
+
+            if (chapter_list.length !== 0) {
+                chapter_list.reverse()
+                if (chapter_list.find((chapter) => chapter.endpoint === ch)) {
+                    chapter_list.map((c, i) => {
+                        if (c.endpoint === ch) {
+                            chapter_list[i].current = true
+                            chapter_list[i - 1] ? chapter_list[i - 1].prev = true : null
+                            chapter_list[i + 1] ? chapter_list[i + 1].next = true : null
+                        }
+                    })
+                }
             }
         }
 
-        newDetail.push({
+        return res.json({
             title,
             poster,
             followed,
@@ -292,7 +299,6 @@ const details = async (req, res) => {
             genres,
             chapter_list,
         })
-        return res.json({ newDetail })
     }).catch((err) => {
         return res.json({
             message: "error ngab!",
