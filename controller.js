@@ -264,11 +264,7 @@ const details = async (req, res) => {
 
         if (chapter_list.length !== 0) {
             chapter_list.reverse()
-
-            if (ch == 0) {
-                chapter_list[ch].current = true
-                chapter_list[ch + 1] ? chapter_list[ch + 1].next = true : null
-            } else if (chapter_list.find((chapter) => chapter.endpoint === ch)) {
+            if (chapter_list.find((chapter) => chapter.endpoint === ch)) {
                 chapter_list.map((c, i) => {
                     if (c.endpoint === ch) {
                         chapter_list[i].current = true
@@ -276,9 +272,6 @@ const details = async (req, res) => {
                         chapter_list[i + 1] ? chapter_list[i + 1].next = true : null
                     }
                 })
-            } else {
-
-                throw new Error()
             }
         }
 
@@ -407,7 +400,7 @@ const getListKomik = async (req, res) => {
             types.push(type)
         })
         $("[name=status]").each((i, el) => {
-            
+
             let stat = {
                 name: $(el).next().text().trim(),
                 value: $(el).val()
