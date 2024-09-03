@@ -1,6 +1,7 @@
 require("dotenv").config()
 const axios = require("axios")
 const cheerio = require("cheerio")
+const sharp = require("sharp")
 const baseUrl = process.env.BASE_URL
 
 const recomendation = async (req, res) => {
@@ -493,5 +494,5 @@ module.exports = {
     bacaKomik,
     allByGenre,
     getListKomik,
-    underated
+    underated,
 }
