@@ -310,7 +310,6 @@ const details = async (req, res) => {
 
 const bacaKomik = async (req, res) => {
     const { endpoint } = req.params
-    const page = []
     let title, page_list
     axios({
         url: `${baseUrl}${endpoint}`,
@@ -328,11 +327,11 @@ const bacaKomik = async (req, res) => {
             page_list.push($2(el).attr("src"))
         })
 
-        page.push({
+        return res.json({
             title,
             page_list,
         })
-        return res.json({ page })
+        
     }).catch((err) => {
         return res.json({
             message: "error ngab!",
