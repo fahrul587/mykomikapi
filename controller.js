@@ -219,34 +219,34 @@ const details = async (req, res) => {
     }).then((result) => {
         const $ = cheerio.load(result.data)
         if (!ch || ch === "false") {
-            title = $(".bixbox ol").children().last().find("a span").text()
+            title = $("h1.entry-title").text()
             poster = $(".thumb").find("img").attr("src")
-            followed = parseFloat($(".bmc").text().replace("Followed by", "").replace("people", "").trim().split(" ")[1])
+            followed = parseFloat($(".bmc").text().split(" ").filter((str) => !isNaN(parseFloat(str))))
             rating = parseFloat($(".num").text())
             status = $(".imptdt i").text()
             type = $(".imptdt a").text()
-            alternative_title = $(".wd-full b").html() === "Alternative Titles" ? $(".wd-full span").first().text() : null
+            alternative_title = $(".wd-full b").html() === "Judul Alternatif" ? $(".wd-full span").first().text() : null
             sysnopsis = $(".wd-full .entry-content").text().trim()
             $(".fmed").each((i, el) => {
-                if ($(el).find("b").html() === "Released") {
+                if ($(el).find("b").html() === "Dirilis") {
                     released = $(el).find("span").text().trim()
                 }
-                if ($(el).find("b").html() === "Author") {
+                if ($(el).find("b").html() === "Penulis") {
                     author = $(el).find("span").text().trim()
                 }
                 if ($(el).find("b").html() === "Artist") {
                     artist = $(el).find("span").text().trim()
                 }
-                if ($(el).find("b").html() === "Posted On") {
+                if ($(el).find("b").html() === "Diposting Pada") {
                     posted_on = $(el).find("span").text().trim()
                 }
-                if ($(el).find("b").html() === "Updated On") {
+                if ($(el).find("b").html() === "Diperbarui Pada") {
                     update_on = $(el).find("span").text().trim()
                 }
             })
             genres = []
             $(".wd-full").each((i, el) => {
-                if ($(el).find("b").html() === "Genres") {
+                if ($(el).find("b").html() === "Genre") {
                     $(el).find(".mgen a").each((i, a) => {
                         const genre = {
                             name: $(a).text(),
