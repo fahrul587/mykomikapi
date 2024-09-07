@@ -1,7 +1,6 @@
 require("dotenv").config()
 const axios = require("axios")
 const cheerio = require("cheerio")
-const sharp = require("sharp")
 const baseUrl = process.env.BASE_URL
 
 const recomendation = async (req, res) => {
@@ -27,10 +26,9 @@ const recomendation = async (req, res) => {
         })
 
         return res.json({
-            message: "berhasil",
-            results: {
-                data: recomendations
-            }
+            status: 200,
+            message: "data berhasil diambil",
+            data: recomendations
         })
     }).catch((err) => {
         return res.json({
@@ -65,11 +63,12 @@ const allSeries = async (req, res) => {
         })
 
         return res.json({
-            message: "berhasil",
-            results: {
+            status: 200,
+            message: "data berhasil diambil",
+            data: {
                 prev: $(".l").length != 0 ? true : false,
                 next: $(".r").length != 0 ? true : false,
-                data: all
+                list: all
             }
         })
     }).catch((err) => {
@@ -145,8 +144,9 @@ const populer = async (req, res) => {
         })
 
         return res.json({
-            message: "berhasil",
-            results: {
+            status: 200,
+            message: "data berhasil diambil",
+            data: {
                 weekly, monthly, allTime
             }
         })
@@ -187,12 +187,13 @@ const search = async (req, res) => {
             pageFound = Number($(".pagination").children().last().text())
         }
         return res.json({
-            message: "berhasil",
-            results: {
+            status: 200,
+            message: "data berhasil diambil",
+            data: {
                 pageFound: pageFound == 0 ? 1 : pageFound,
                 prev: $(".prev").length != 0 ? true : false,
                 next: $(".next").length != 0 ? true : false,
-                data: searchResults
+                list: searchResults
             }
         })
     }).catch((err) => {
@@ -225,7 +226,7 @@ const details = async (req, res) => {
             rating = parseFloat($(".num").text())
             status = $(".imptdt i").text()
             type = $(".imptdt a").text()
-            alternative_title = $(".wd-full b").html() === "Judul Alternatif" ? $(".wd-full span").first().text() : null
+            alternative_title = $(".wd-full b").html() === "Alternative Titles" || $(".wd-full").prev().hasClass("socialts") ? $(".wd-full span").first().text() : null
             sysnopsis = $(".wd-full .entry-content").text().trim()
             $(".fmed").each((i, el) => {
                 if ($(el).find("b").html() === "Dirilis") {
@@ -235,7 +236,7 @@ const details = async (req, res) => {
                     author = $(el).find("span").text().trim()
                 }
                 if ($(el).find("b").html() === "Artist") {
-                    artist = $(el).find("span").text().trim()
+                    artist = $(el).find("span").text().replace("[Add, ]", "").trim()
                 }
                 if ($(el).find("b").html() === "Diposting Pada") {
                     posted_on = $(el).find("span").text().trim()
@@ -246,15 +247,13 @@ const details = async (req, res) => {
             })
             genres = []
             $(".wd-full").each((i, el) => {
-                if ($(el).find("b").html() === "Genre") {
-                    $(el).find(".mgen a").each((i, a) => {
-                        const genre = {
-                            name: $(a).text(),
-                            link: $(a).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
-                        }
-                        genres.push(genre)
-                    })
-                }
+                $(el).find(".mgen a").each((i, a) => {
+                    const genre = {
+                        name: $(a).text(),
+                        link: $(a).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
+                    }
+                    genres.push(genre)
+                })
             })
         }
 
@@ -284,21 +283,25 @@ const details = async (req, res) => {
         }
 
         return res.json({
-            title,
-            poster,
-            followed,
-            rating,
-            status,
-            type,
-            alternative_title,
-            sysnopsis,
-            released,
-            author,
-            artist,
-            posted_on,
-            update_on,
-            genres,
-            chapter_list,
+            status: 200,
+            message: "data berhasil diambil",
+            data: {
+                title,
+                poster,
+                followed,
+                rating,
+                status,
+                type,
+                alternative_title,
+                sysnopsis,
+                released,
+                author,
+                artist,
+                posted_on,
+                update_on,
+                genres,
+                chapter_list,
+            }
         })
     }).catch((err) => {
         return res.json({
@@ -328,52 +331,18 @@ const bacaKomik = async (req, res) => {
         })
 
         return res.json({
-            title,
-            page_list,
+            status: 200,
+            message: "data berhasil diambil",
+            data: {
+                title,
+                page_list,
+            }
         })
-        
+
     }).catch((err) => {
         return res.json({
             message: "error ngab!",
             status: 404,
-        })
-    })
-}
-
-const allByGenre = async (req, res) => {
-    const { genre, page = 1 } = req.params
-    const byGenre = {
-        results: {
-            page: parseInt(page),
-            result: [],
-        },
-        pages: "",
-    }
-    let poster, type, title, endpoint, rating, chapter
-    axios({
-        url: `${baseUrl}genres/${genre}/page/${page}`,
-        method: "get",
-        headers: {
-            "User-Agent": "Chrome",
-        },
-    }).then((result) => {
-        const $ = cheerio.load(result.data)
-        byGenre.pages = $(".dots").parent().text()
-        $(".listupd .bs").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
-            type = $(el).find("span.type").text()
-            poster = $(el).find("img").attr("src")
-            title = $(el).find(".tt").text().trim()
-            chapter = $(el).find(".epxs").text().trim()
-            rating = parseFloat($(el).find(".numscore").text().trim())
-
-            byGenre.results.result.push({ endpoint, type, poster, title, chapter, rating })
-        })
-        return res.json({ byGenre })
-    }).catch((err) => {
-        res.json({
-            message: "error",
-            status: 404
         })
     })
 }
@@ -433,7 +402,9 @@ const getListKomik = async (req, res) => {
         types.shift()
         genres.shift()
         return res.json({
-            result: {
+            status: 200,
+            message: "data berhasil diambil",
+            data: {
                 genres,
                 types,
                 status
@@ -441,7 +412,7 @@ const getListKomik = async (req, res) => {
         })
     }).catch((err) => {
         res.json({
-            message: "error",
+            message: "error ngabs",
             status: 404
         })
     })
@@ -470,9 +441,9 @@ const underated = async (req, res) => {
         })
 
         return res.json({
-            result: {
-                data: underateds
-            }
+            status: 200,
+            message: "data berhasil diambil",
+            data: underateds
         })
     }).catch((err) => {
         res.json({
@@ -482,8 +453,6 @@ const underated = async (req, res) => {
     })
 }
 
-
-
 module.exports = {
     recomendation,
     allSeries,
@@ -491,7 +460,6 @@ module.exports = {
     search,
     details,
     bacaKomik,
-    allByGenre,
     getListKomik,
     underated,
 }
