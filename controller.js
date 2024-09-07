@@ -24,7 +24,7 @@ const recomendation = async (req, res) => {
 
             recomendations.push({ endpoint, type, poster, title, chapter, rating })
         })
-
+        if (recomendations.length === 0) throw new Error()
         return res.json({
             status: 200,
             message: "data berhasil diambil",
@@ -61,6 +61,8 @@ const allSeries = async (req, res) => {
 
             all.push({ endpoint, type, poster, title, chapter, rating })
         })
+
+        if (all.length === 0) throw new Error()
 
         return res.json({
             status: 200,
@@ -142,7 +144,7 @@ const populer = async (req, res) => {
 
             allTime.push({ endpoint, poster, title, genres, rating })
         })
-
+        if (weekly.length === 0 && monthly.length === 0 && allTime.length === 0) throw new Error()
         return res.json({
             status: 200,
             message: "data berhasil diambil",
@@ -186,6 +188,7 @@ const search = async (req, res) => {
         } else if ($(".pagination").children()) {
             pageFound = Number($(".pagination").children().last().text())
         }
+        if (searchResults.length === 0) throw new Error()
         return res.json({
             status: 200,
             message: "data berhasil diambil",
@@ -229,19 +232,19 @@ const details = async (req, res) => {
             alternative_title = $(".wd-full b").html() === "Alternative Titles" || $(".wd-full").prev().hasClass("socialts") ? $(".wd-full span").first().text() : null
             sysnopsis = $(".wd-full .entry-content").text().trim()
             $(".fmed").each((i, el) => {
-                if ($(el).find("b").html() === "Dirilis") {
+                if ($(el).find("b").html() === "Released") {
                     released = $(el).find("span").text().trim()
                 }
-                if ($(el).find("b").html() === "Penulis") {
-                    author = $(el).find("span").text().trim()
+                if ($(el).find("b").html() === "Author") {
+                    author = $(el).find("span").text().replace(/\[Add, \]/g, "").trim()
                 }
                 if ($(el).find("b").html() === "Artist") {
-                    artist = $(el).find("span").text().replace("[Add, ]", "").trim()
+                    artist = $(el).find("span").text().replace(/\[Add, \]/g, "").trim()
                 }
-                if ($(el).find("b").html() === "Diposting Pada") {
+                if ($(el).find("b").html() === "Posted On") {
                     posted_on = $(el).find("span").text().trim()
                 }
-                if ($(el).find("b").html() === "Diperbarui Pada") {
+                if ($(el).find("b").html() === "Updated On") {
                     update_on = $(el).find("span").text().trim()
                 }
             })
@@ -439,11 +442,13 @@ const underated = async (req, res) => {
 
             underateds.push({ endpoint, type, poster, title, chapter, rating })
         })
-
+        if (underateds.length === 0) throw new Error()
         return res.json({
             status: 200,
             message: "data berhasil diambil",
-            data: underateds
+            data: {
+                list: underateds
+            }
         })
     }).catch((err) => {
         res.json({
