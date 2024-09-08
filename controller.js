@@ -92,79 +92,77 @@ const populer = async (req, res) => {
         headers: {
             "User-Agent": "Chrome",
         },
-    }).then((result) => {
+    }).then(async (result) => {
         const $ = cheerio.load(result.data)
-        axios({
+        const response = await axios({
             url: `${process.env.API_URL}/api/filterlist?s=false&t=false`,
             method: "get",
             headers: {
                 "Authorization": `Bearer ${process.env.ACCESS_TOKEN}`,
                 "User-Agent": "Chrome",
             },
-        }).then(r => {
-            const allGenre = r.data.data.genres
-            $(".wpop-weekly li").each((i, el) => {
-                endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
-                poster = $(el).find("img").attr("src")
-                title = $(el).find("h2 > a").text().trim()
-                genres = []
-                $(el).find("span a").map((i, g) => {
-                    const genre = {
-                        name: $(g).text().trim(),
-                        link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
-                        value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
-                    }
-                    genres.push(genre)
-                })
-                rating = parseFloat($(el).find(".numscore").text().trim())
-
-                weekly.push({ endpoint, poster, title, genres, rating })
-            })
-
-            $(".wpop-monthly li").each((i, el) => {
-                endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
-                poster = $(el).find("img").attr("src")
-                title = $(el).find("h2 > a").text().trim()
-                genres = []
-                $(el).find("span > a").each((i, g) => {
-                    const genre = {
-                        name: $(g).text().trim(),
-                        link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
-                        value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
-                    }
-                    genres.push(genre)
-                })
-                rating = parseFloat($(el).find(".numscore").text().trim())
-
-                monthly.push({ endpoint, poster, title, genres, rating })
-            })
-
-            $(".wpop-alltime li").each((i, el) => {
-                endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
-                poster = $(el).find("img").attr("src")
-                title = $(el).find("h2 > a").text().trim()
-                genres = []
-                $(el).find("span > a").each((i, g) => {
-                    const genre = {
-                        name: $(g).text().trim(),
-                        link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
-                        value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
-                    }
-                    genres.push(genre)
-                })
-                rating = parseFloat($(el).find(".numscore").text().trim())
-
-                allTime.push({ endpoint, poster, title, genres, rating })
-            })
-            if (weekly.length === 0 && monthly.length === 0 && allTime.length === 0) throw new Error()
-            return res.json({
-                status: 200,
-                message: "data berhasil diambil",
-                data: {
-                    weekly, monthly, allTime
+        })
+        const allGenre = response.data.data.genres
+        $(".wpop-weekly li").each((i, el) => {
+            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            poster = $(el).find("img").attr("src")
+            title = $(el).find("h2 > a").text().trim()
+            genres = []
+            $(el).find("span a").map((i, g) => {
+                const genre = {
+                    name: $(g).text().trim(),
+                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
+                    value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
                 }
+                genres.push(genre)
             })
+            rating = parseFloat($(el).find(".numscore").text().trim())
 
+            weekly.push({ endpoint, poster, title, genres, rating })
+        })
+
+        $(".wpop-monthly li").each((i, el) => {
+            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            poster = $(el).find("img").attr("src")
+            title = $(el).find("h2 > a").text().trim()
+            genres = []
+            $(el).find("span > a").each((i, g) => {
+                const genre = {
+                    name: $(g).text().trim(),
+                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
+                    value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
+                }
+                genres.push(genre)
+            })
+            rating = parseFloat($(el).find(".numscore").text().trim())
+
+            monthly.push({ endpoint, poster, title, genres, rating })
+        })
+
+        $(".wpop-alltime li").each((i, el) => {
+            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            poster = $(el).find("img").attr("src")
+            title = $(el).find("h2 > a").text().trim()
+            genres = []
+            $(el).find("span > a").each((i, g) => {
+                const genre = {
+                    name: $(g).text().trim(),
+                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
+                    value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
+                }
+                genres.push(genre)
+            })
+            rating = parseFloat($(el).find(".numscore").text().trim())
+
+            allTime.push({ endpoint, poster, title, genres, rating })
+        })
+        if (weekly.length === 0 && monthly.length === 0 && allTime.length === 0) throw new Error()
+        return res.json({
+            status: 200,
+            message: "data berhasil diambil",
+            data: {
+                weekly, monthly, allTime
+            }
         })
     }).catch((err) => {
         return res.json({
@@ -223,8 +221,7 @@ const search = async (req, res) => {
 
 const details = async (req, res) => {
     const { endpoint } = req.params
-    const { ch } = req.query
-
+    const { ch = true, sy = true, g = true, all = true } = req.query
     let title, alternative_title, sysnopsis, released, author, artist, posted_on, update_on, poster, rating, status, type, followed, genres, chapter_list
 
 
@@ -234,9 +231,9 @@ const details = async (req, res) => {
         headers: {
             "User-Agent": "Chrome",
         },
-    }).then((result) => {
+    }).then(async (result) => {
         const $ = cheerio.load(result.data)
-        if (!ch || ch === "false") {
+        if (all === true) {
             title = $("h1.entry-title").text()
             poster = $(".thumb").find("img").attr("src")
             followed = parseFloat($(".bmc").text().split(" ").filter((str) => !isNaN(parseFloat(str))))
@@ -244,7 +241,7 @@ const details = async (req, res) => {
             status = $(".imptdt i").text()
             type = $(".imptdt a").text()
             alternative_title = $(".wd-full b").html() === "Alternative Titles" || $(".wd-full").prev().hasClass("socialts") ? $(".wd-full span").first().text() : null
-            sysnopsis = $(".wd-full .entry-content").text().trim()
+
             $(".fmed").each((i, el) => {
                 if ($(el).find("b").html() === "Released") {
                     released = $(el).find("span").text().trim()
@@ -262,20 +259,34 @@ const details = async (req, res) => {
                     update_on = $(el).find("span").text().trim()
                 }
             })
+        }
+
+        if (sy === true) sysnopsis = $(".wd-full .entry-content").text().trim()
+
+        if (g === true) {
+            const response = await axios({
+                url: `${process.env.API_URL}/api/filterlist?s=false&t=false`,
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${process.env.ACCESS_TOKEN}`,
+                    "User-Agent": "Chrome",
+                },
+            })
+            const allGenre = response.data.data.genres
             genres = []
             $(".wd-full").each((i, el) => {
                 $(el).find(".mgen a").each((i, a) => {
                     const genre = {
                         name: $(a).text(),
-                        link: $(a).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
+                        link: $(a).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
+                        value: allGenre[allGenre.findIndex(item => item.name === $(a).text().trim())].value
                     }
                     genres.push(genre)
                 })
             })
         }
 
-        if (ch !== "false") {
-
+        if (ch === true || ch.length !== 0) {
             chapter_list = []
             $("#chapterlist ul li").each((i, el) => {
                 chapter_list.push({
@@ -285,7 +296,7 @@ const details = async (req, res) => {
                 })
             })
 
-            if (chapter_list.length !== 0) {
+            if (chapter_list.length !== 0 && ch !== true) {
                 chapter_list.reverse()
                 if (chapter_list.find((chapter) => chapter.endpoint === ch)) {
                     chapter_list.map((c, i) => {
