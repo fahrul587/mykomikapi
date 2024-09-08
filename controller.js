@@ -94,63 +94,77 @@ const populer = async (req, res) => {
         },
     }).then((result) => {
         const $ = cheerio.load(result.data)
-        $(".wpop-weekly li").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
-            poster = $(el).find("img").attr("src")
-            title = $(el).find("h2 > a").text().trim()
-            genres = []
-            $(el).find("span a").map((i, g) => {
-                const genre = {
-                    name: $(g).text().trim(),
-                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
-                }
-                genres.push(genre)
+        axios({
+            url: `${process.env.API_URL}/api/filterlist?s=false&t=false`,
+            method: "get",
+            headers: {
+                "Authorization": `Bearer ${process.env.ACCESS_TOKEN}`,
+                "User-Agent": "Chrome",
+            },
+        }).then(r => {
+            const allGenre = r.data.data.genres
+            $(".wpop-weekly li").each((i, el) => {
+                endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+                poster = $(el).find("img").attr("src")
+                title = $(el).find("h2 > a").text().trim()
+                genres = []
+                $(el).find("span a").map((i, g) => {
+                    const genre = {
+                        name: $(g).text().trim(),
+                        link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
+                        value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
+                    }
+                    genres.push(genre)
+                })
+                rating = parseFloat($(el).find(".numscore").text().trim())
+
+                weekly.push({ endpoint, poster, title, genres, rating })
             })
-            rating = parseFloat($(el).find(".numscore").text().trim())
 
-            weekly.push({ endpoint, poster, title, genres, rating })
-        })
+            $(".wpop-monthly li").each((i, el) => {
+                endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+                poster = $(el).find("img").attr("src")
+                title = $(el).find("h2 > a").text().trim()
+                genres = []
+                $(el).find("span > a").each((i, g) => {
+                    const genre = {
+                        name: $(g).text().trim(),
+                        link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
+                        value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
+                    }
+                    genres.push(genre)
+                })
+                rating = parseFloat($(el).find(".numscore").text().trim())
 
-        $(".wpop-monthly li").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
-            poster = $(el).find("img").attr("src")
-            title = $(el).find("h2 > a").text().trim()
-            genres = []
-            $(el).find("span > a").each((i, g) => {
-                const genre = {
-                    name: $(g).text().trim(),
-                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
-                }
-                genres.push(genre)
+                monthly.push({ endpoint, poster, title, genres, rating })
             })
-            rating = parseFloat($(el).find(".numscore").text().trim())
 
-            monthly.push({ endpoint, poster, title, genres, rating })
-        })
+            $(".wpop-alltime li").each((i, el) => {
+                endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+                poster = $(el).find("img").attr("src")
+                title = $(el).find("h2 > a").text().trim()
+                genres = []
+                $(el).find("span > a").each((i, g) => {
+                    const genre = {
+                        name: $(g).text().trim(),
+                        link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
+                        value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
+                    }
+                    genres.push(genre)
+                })
+                rating = parseFloat($(el).find(".numscore").text().trim())
 
-        $(".wpop-alltime li").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
-            poster = $(el).find("img").attr("src")
-            title = $(el).find("h2 > a").text().trim()
-            genres = []
-            $(el).find("span > a").each((i, g) => {
-                const genre = {
-                    name: $(g).text().trim(),
-                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, "")
-                }
-                genres.push(genre)
+                allTime.push({ endpoint, poster, title, genres, rating })
             })
-            rating = parseFloat($(el).find(".numscore").text().trim())
+            if (weekly.length === 0 && monthly.length === 0 && allTime.length === 0) throw new Error()
+            return res.json({
+                status: 200,
+                message: "data berhasil diambil",
+                data: {
+                    weekly, monthly, allTime
+                }
+            })
 
-            allTime.push({ endpoint, poster, title, genres, rating })
-        })
-        if (weekly.length === 0 && monthly.length === 0 && allTime.length === 0) throw new Error()
-        return res.json({
-            status: 200,
-            message: "data berhasil diambil",
-            data: {
-                weekly, monthly, allTime
-            }
         })
     }).catch((err) => {
         return res.json({
@@ -351,6 +365,7 @@ const bacaKomik = async (req, res) => {
 }
 
 const getListKomik = async (req, res) => {
+    const { g = true, t = true, s = true } = req.query
     let genres = []
     let types = []
     let status = []
@@ -362,45 +377,52 @@ const getListKomik = async (req, res) => {
         },
     }).then((result) => {
         const $ = cheerio.load(result.data)
-        $(".genrez li").each((i, el) => {
-            let genre = {
-                name: $(el).text().trim(),
-                value: $(el).find("input").val()
-            }
-            genres.push(genre)
-        })
-        $("[name=type]").each((i, el) => {
-            let type = {
-                name: $(el).next().text().trim(),
-                value: $(el).val()
-            }
-            $(el).text().trim()
-            types.push(type)
-        })
-        $("[name=status]").each((i, el) => {
+        if (g === true) {
+            $(".genrez li").each((i, el) => {
+                let genre = {
+                    name: $(el).text().trim(),
+                    value: $(el).find("input").val()
+                }
+                genres.push(genre)
+            })
+            genres = genres.filter((item, index, self) =>
+                index === self.findIndex((t) => (
+                    t.name === item.name && t.value === item.value
+                ))
+            );
+        }
+        if (t === true) {
 
-            let stat = {
-                name: $(el).next().text().trim(),
-                value: $(el).val()
-            }
-            $(el).text().trim()
-            status.push(stat)
-        })
-        genres = genres.filter((item, index, self) =>
-            index === self.findIndex((t) => (
-                t.name === item.name && t.value === item.value
-            ))
-        );
-        types = types.filter((item, index, self) =>
-            index === self.findIndex((t) => (
-                t.name === item.name && t.value === item.value
-            ))
-        );
-        status = status.filter((item, index, self) =>
-            index === self.findIndex((t) => (
-                t.name === item.name && t.value === item.value
-            ))
-        );
+            $("[name=type]").each((i, el) => {
+                let type = {
+                    name: $(el).next().text().trim(),
+                    value: $(el).val()
+                }
+                $(el).text().trim()
+                types.push(type)
+            })
+            types = types.filter((item, index, self) =>
+                index === self.findIndex((t) => (
+                    t.name === item.name && t.value === item.value
+                ))
+            );
+        }
+        if (s === true) {
+            $("[name=status]").each((i, el) => {
+                let stat = {
+                    name: $(el).next().text().trim(),
+                    value: $(el).val()
+                }
+                $(el).text().trim()
+                status.push(stat)
+            })
+            status = status.filter((item, index, self) =>
+                index === self.findIndex((t) => (
+                    t.name === item.name && t.value === item.value
+                ))
+            );
+        }
+
         status.shift()
         types.shift()
         genres.shift()
