@@ -15,7 +15,7 @@ const recomendation = async (req, res) => {
     }).then((result) => {
         const $ = cheerio.load(result.data)
         $(".hothome  .listupd .bs").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            endpoint = $(el).find("a").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
             type = $(el).find("span.type").text()
             poster = $(el).find("img").attr("src")
             title = $(el).find(".tt").text().trim()
@@ -42,7 +42,6 @@ const allSeries = async (req, res) => {
     const { genres, types, page = 1, status } = req.params
     let all = []
     let poster, type, title, endpoint, rating, chapter
-    console.log(`${baseUrl}manga/?page=${page}&${genres}&${types}&${status}`)
     axios({
         url: `${baseUrl}manga/?page=${page}&${genres}&${types}&${status}`,
         method: "get",
@@ -52,7 +51,7 @@ const allSeries = async (req, res) => {
     }).then((result) => {
         const $ = cheerio.load(result.data)
         $(".listupd .bs").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            endpoint = $(el).find("a").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
             type = $(el).find("span.type").text()
             poster = $(el).find("img").attr("src")
             title = $(el).find(".tt").text().trim()
@@ -104,14 +103,14 @@ const populer = async (req, res) => {
         })
         const allGenre = response.data.data.genres
         $(".wpop-weekly li").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            endpoint = $(el).find("a").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
             poster = $(el).find("img").attr("src")
             title = $(el).find("h2 > a").text().trim()
             genres = []
             $(el).find("span a").map((i, g) => {
                 const genre = {
                     name: $(g).text().trim(),
-                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
+                    link: $(g).attr("href").replace(`${baseUrl}genres`, "").replace(/\//g, ""),
                     value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
                 }
                 genres.push(genre)
@@ -122,14 +121,14 @@ const populer = async (req, res) => {
         })
 
         $(".wpop-monthly li").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            endpoint = $(el).find("a").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
             poster = $(el).find("img").attr("src")
             title = $(el).find("h2 > a").text().trim()
             genres = []
             $(el).find("span > a").each((i, g) => {
                 const genre = {
                     name: $(g).text().trim(),
-                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
+                    link: $(g).attr("href").replace(`${baseUrl}genres`, "").replace(/\//g, ""),
                     value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
                 }
                 genres.push(genre)
@@ -140,14 +139,14 @@ const populer = async (req, res) => {
         })
 
         $(".wpop-alltime li").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            endpoint = $(el).find("a").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
             poster = $(el).find("img").attr("src")
             title = $(el).find("h2 > a").text().trim()
             genres = []
             $(el).find("span > a").each((i, g) => {
                 const genre = {
                     name: $(g).text().trim(),
-                    link: $(g).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
+                    link: $(g).attr("href").replace(`${baseUrl}genres`, "").replace(/\//g, ""),
                     value: allGenre[allGenre.findIndex(item => item.name === $(g).text().trim())].value
                 }
                 genres.push(genre)
@@ -185,7 +184,7 @@ const search = async (req, res) => {
     }).then((result) => {
         const $ = cheerio.load(result.data)
         $(".listupd .bs").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            endpoint = $(el).find("a").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
             type = $(el).find("span.type").text()
             poster = $(el).find("img").attr("src")
             title = $(el).find(".tt").text().trim()
@@ -278,7 +277,7 @@ const details = async (req, res) => {
                 $(el).find(".mgen a").each((i, a) => {
                     const genre = {
                         name: $(a).text(),
-                        link: $(a).attr("href").replace("https://mangatale.co/genres", "").replace(/\//g, ""),
+                        link: $(a).attr("href").replace(`${baseUrl}genres`, "").replace(/\//g, ""),
                         value: allGenre[allGenre.findIndex(item => item.name === $(a).text().trim())].value
                     }
                     genres.push(genre)
@@ -286,13 +285,13 @@ const details = async (req, res) => {
             })
         }
 
-        if (ch === true || ch.length !== 0) {
+        if (ch === true || ch.length !== 0 && ch !== "false") {
             chapter_list = []
             $("#chapterlist ul li").each((i, el) => {
                 chapter_list.push({
                     name: $(el).find(".chapternum").text(),
                     release_on: $(el).find(".chapterdate").text(),
-                    endpoint: $(el).find("a").attr("href").replace("https://mangatale.co", "").replace(/\//g, ""),
+                    endpoint: $(el).find("a").attr("href").replace(baseUrl, "").replace(/\//g, ""),
                 })
             })
 
@@ -466,7 +465,7 @@ const underated = async (req, res) => {
     }).then((result) => {
         const $ = cheerio.load(result.data)
         $(".tab-pane .bs:first-child").map((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace("https://mangatale.co/manga", "").replace(/\//g, "")
+            endpoint = $(el).find("a").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
             type = $(el).find("span.type").text()
             poster = $(el).find("img").attr("src")
             title = $(el).find(".tt").text().trim()
