@@ -14,8 +14,8 @@ const recomendation = async (req, res) => {
         },
     }).then((result) => {
         const $ = cheerio.load(result.data)
-        $(".hothome  .listupd .bs").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
+        $(".hothome .listupd .bs").each((i, el) => {
+            endpoint = $(el).find("a[title]").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
             type = $(el).find("span.type").text()
             poster = $(el).find("img").attr("src")
             title = $(el).find(".tt").text().trim()
@@ -51,7 +51,7 @@ const allSeries = async (req, res) => {
     }).then((result) => {
         const $ = cheerio.load(result.data)
         $(".listupd .bs").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
+            endpoint = $(el).find("a[title]").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
             type = $(el).find("span.type").text()
             poster = $(el).find("img").attr("src")
             title = $(el).find(".tt").text().trim()
@@ -183,8 +183,9 @@ const search = async (req, res) => {
         },
     }).then((result) => {
         const $ = cheerio.load(result.data)
+        
         $(".listupd .bs").each((i, el) => {
-            endpoint = $(el).find("a").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
+            endpoint = $(el).find("a[title]").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
             type = $(el).find("span.type").text()
             poster = $(el).find("img").attr("src")
             title = $(el).find(".tt").text().trim()
