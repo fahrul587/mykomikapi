@@ -183,7 +183,7 @@ const search = async (req, res) => {
         },
     }).then((result) => {
         const $ = cheerio.load(result.data)
-        
+
         $(".listupd .bs").each((i, el) => {
             endpoint = $(el).find("a[title]").attr("href").replace(`${baseUrl}manga`, "").replace(/\//g, "")
             type = $(el).find("span.type").text()
@@ -351,9 +351,10 @@ const bacaKomik = async (req, res) => {
     }).then((result) => {
         const $ = cheerio.load(result.data)
         title = $(".entry-title").text()
-        const data_src = $("#readerarea").text()
+        const data_src = $("#readerarea").html().replace(/<noscript>/g, '<div class="noscript">').replace(/<\/noscript>/g, '</div>')
         const $2 = cheerio.load(data_src)
         page_list = []
+
         $2("p img").each((i, el) => {
             page_list.push($2(el).attr("src"))
         })
